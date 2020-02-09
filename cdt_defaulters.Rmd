@@ -1,0 +1,182 @@
+---
+title: "Credit Card defaulters Analysis"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(DT)
+library(rpivotTable)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+library(openintro)
+library(ggvis)
+   
+library(unbalanced)  
+library(rpart)       
+library(randomForest)
+library(e1071)  
+library(nnet) 
+library(caret)  
+library(pROC)   
+library(stringi)
+library(ggthemes)
+library(corrplot)
+```
+
+```{r global, include=FALSE}
+data <- read.csv("details1.csv")
+colnames(data)[colnames(data)=="default.payment.next.month"] <- "default_payment"
+dupdata <- data
+data[, 1:25] <- sapply(data[, 1:25], as.character)
+data[, 1:25] <- sapply(data[, 1:25], as.numeric)
+
+data$EDUCATION[data$EDUCATION == 0] <- 4
+data$EDUCATION[data$EDUCATION == 5] <- 4
+data$EDUCATION[data$EDUCATION == 6] <- 4
+data$MARRIAGE[data$MARRIAGE == 0] <- 3
+
+#for data exlporation
+dupdata$EDUCATION[dupdata$EDUCATION == 0] <- 4
+dupdata$EDUCATION[dupdata$EDUCATION == 5] <- 4
+dupdata$EDUCATION[dupdata$EDUCATION == 6] <- 4
+dupdata$MARRIAGE[dupdata$MARRIAGE == 0] <- 3
+dupdata$AGE <-cut(dupdata$AGE, breaks = c( 10, 30,50,100), labels = c("young", "middle","senior"))
+dupdata$SEX<-cut(dupdata$SEX, 2,labels = c("Female","Male"))
+dupdata$MARRIAGE<-cut(dupdata$MARRIAGE, 4,labels = c("married","single","Divorced","other"))
+dupdata$EDUCATION<-cut(dupdata$EDUCATION, 4,labels = c("GraduateSchool","University","High school","Other"))
+
+set.seed(123)
+correlationMatrix <- cor(data)
+
+```
+
+Exploratory Analysis
+======================================
+
+Row
+----------------------------
+
+### Density Plot for Gender
+
+```{r}
+p2 <- ggplot(dupdata, aes(x = SEX, fill = default_payment)) + geom_density()+ xlab("Default Payment Status") + ylab("Customer Counts") 
+
+ggplotly(p2)
+```
+
+### Gender wise Distribution
+
+```{r}
+p <- ggplot(data=dupdata, mapping = aes(x=SEX, fill=default_payment)) + geom_bar()+ xlab("Gender") + ylab("Customer Counts") +theme_few()
+ggplotly(p)
+```
+
+
+
+Row
+----------------------------
+
+
+### Age wise Density Plot
+
+```{r}
+p3 <- ggplot(dupdata, aes(x = AGE, fill = default_payment)) + geom_density()+ xlab("Age Category") + ylab("Customer Counts") 
+
+ggplotly(p3)
+```
+
+
+### Age wise boxplot
+
+```{r}
+p <- ggplot(data=dupdata,mapping = aes(x=AGE,y=dupdata$LIMIT_BAL,fill=default_payment)) + geom_boxplot()+ xlab("Age Category") + ylab("Customer Counts")  
+ggplotly(p)
+```
+
+Row
+----------------------------
+
+### Education 
+
+```{r}
+p4 <-  ggplot(data=dupdata,mapping = aes(x=EDUCATION,y=dupdata$LIMIT_BAL,fill=default_payment)) + geom_boxplot()+ xlab("Education") + ylab("Customer Counts")  
+
+ggplotly(p4)
+```
+
+### Heat Map for Education - Age
+
+```{r}
+dupdata %>% group_by(EDUCATION,AGE) %>% summarise(mn_creditlmt=mean(LIMIT_BAL)) -> df
+p5 <- ggplot(df, aes(EDUCATION, AGE, fill=mn_creditlmt)) + geom_tile() + scale_fill_gradient(low="white", high="steelblue")
+
+ggplotly(p5)
+```
+
+Row
+-----------------------
+
+### Marital Status wise Distribution
+
+```{r}
+p <- ggplot(data=dupdata, mapping = aes(x=MARRIAGE, fill=default_payment)) + geom_bar()+ xlab("Marital Status") + ylab("Customer Counts")  +theme_few()
+ggplotly(p)
+```
+
+Correlation Plot
+=======================
+
+### Correlation Plot
+
+```{r}
+
+corrplot(correlationMatrix, method="color")
+
+```
+
+
+Prediction Stats
+============================================
+
+### AUC Curve
+
+```{r}
+print("Work in progress")
+```
+
+
+Summary {data-orientation=columns} 
+===========================================
+
+
+Column
+---------------------------
+
+Report
+
+* This Page is under Construction
+
+
+This report was generated on `r format(Sys.Date(), format = "%B %d, %Y")`.
+
+
+
+
+About Report
+========================================
+
+Created by: Vignesh EA
+
+Confidential: Nothing like that!
+
+
+
+
+
+
