@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: scroll
+    #runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -16,7 +17,7 @@ library(plotly)
 library(dplyr)
 library(openintro)
 library(ggvis)
-   
+library(reshape2)
 library(unbalanced)  
 library(rpart)       
 library(randomForest)
@@ -26,7 +27,8 @@ library(caret)
 library(pROC)   
 library(stringi)
 library(ggthemes)
-library(corrplot)
+#library(corrplot)
+library(ggcorrplot)
 ```
 
 ```{r global, include=FALSE}
@@ -52,36 +54,37 @@ dupdata$MARRIAGE<-cut(dupdata$MARRIAGE, 4,labels = c("married","single","Divorce
 dupdata$EDUCATION<-cut(dupdata$EDUCATION, 4,labels = c("GraduateSchool","University","High school","Other"))
 
 set.seed(123)
-correlationMatrix <- cor(data)
-
+correlationMatrix <- round(cor(data),1)
 ```
 
 Exploratory Analysis
 ======================================
 
+
 Row
 ----------------------------
+
 
 ### Density Plot for Gender
 
 ```{r}
-p2 <- ggplot(dupdata, aes(x = SEX, fill = default_payment)) + geom_density()+ xlab("Default Payment Status") + ylab("Customer Counts") 
+p2 <- ggplot(dupdata, aes(x = SEX, fill = default_payment)) + geom_density()+ xlab("Gender") + ylab("Default Payment Status") 
 
 ggplotly(p2)
 ```
 
+
 ### Gender wise Distribution
+
 
 ```{r}
 p <- ggplot(data=dupdata, mapping = aes(x=SEX, fill=default_payment)) + geom_bar()+ xlab("Gender") + ylab("Customer Counts") +theme_few()
+
 ggplotly(p)
 ```
 
-
-
 Row
 ----------------------------
-
 
 ### Age wise Density Plot
 
@@ -91,11 +94,11 @@ p3 <- ggplot(dupdata, aes(x = AGE, fill = default_payment)) + geom_density()+ xl
 ggplotly(p3)
 ```
 
-
 ### Age wise boxplot
 
 ```{r}
-p <- ggplot(data=dupdata,mapping = aes(x=AGE,y=dupdata$LIMIT_BAL,fill=default_payment)) + geom_boxplot()+ xlab("Age Category") + ylab("Customer Counts")  
+p <- ggplot(data=dupdata,mapping = aes(x=AGE,y=dupdata$LIMIT_BAL,fill=default_payment)) + geom_boxplot()+ xlab("Age Category") + ylab("Bank Balance")  
+
 ggplotly(p)
 ```
 
@@ -105,7 +108,7 @@ Row
 ### Education 
 
 ```{r}
-p4 <-  ggplot(data=dupdata,mapping = aes(x=EDUCATION,y=dupdata$LIMIT_BAL,fill=default_payment)) + geom_boxplot()+ xlab("Education") + ylab("Customer Counts")  
+p4 <-  ggplot(data=dupdata,mapping = aes(x=EDUCATION,y=dupdata$LIMIT_BAL,fill=default_payment)) + geom_boxplot()+ xlab("Education") + ylab("Bank Balance")  
 
 ggplotly(p4)
 ```
@@ -126,8 +129,10 @@ Row
 
 ```{r}
 p <- ggplot(data=dupdata, mapping = aes(x=MARRIAGE, fill=default_payment)) + geom_bar()+ xlab("Marital Status") + ylab("Customer Counts")  +theme_few()
+
 ggplotly(p)
 ```
+
 
 Correlation Plot
 =======================
@@ -135,9 +140,14 @@ Correlation Plot
 ### Correlation Plot
 
 ```{r}
+pc <- ggcorrplot::ggcorrplot(correlationMatrix, hc.order = TRUE, type = "lower",outline.col = "white")+ theme(axis.text.x=element_text(angle=90, hjust=1))
+#ggplotly(pc)
 
-corrplot(correlationMatrix, method="color")
-
+a <- melt(correlationMatrix)
+c <- a[a$Var2=='default_payment',]
+#pc <- ggplot(a, aes(Var1, Var2, fill = value)) +geom_tile()+  scale_fill_gradient2(low="blue", mid="white", high="red") + theme(axis.text.x=element_text(angle=90, hjust=1))
+#ggplotly(pc)
+pc
 ```
 
 
