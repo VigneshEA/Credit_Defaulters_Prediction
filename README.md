@@ -2,3 +2,5 @@
 An Application for predicting Credit Defaulters
 
 Go to site -> https://vigneshea.shinyapps.io/cdt_defaulters/
+
+or try knitting the Document -> cdt_defaulters.rmd
