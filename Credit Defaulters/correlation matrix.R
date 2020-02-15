@@ -4,5 +4,8 @@ set.seed(123)
 correlationMatrix <- cor(UCI_Crecard[,8:24])
 
 
-highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.8)
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.8,verbose=T)
 print(highlyCorrelated)
+d <- data[,-highlyCorrelated]
+new <- correlationMatrix[,-highlyCorrelated]
+new

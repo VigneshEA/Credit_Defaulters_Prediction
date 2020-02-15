@@ -1,4 +1,4 @@
-# convert all intigers to numeric
+# convert all integers to numeric
 UCI_Crecard$PAY_0<-as.numeric(UCI_Crecard$PAY_0)
 UCI_Crecard$PAY_2<-as.numeric(UCI_Crecard$PAY_2)
 UCI_Crecard$PAY_3<-as.numeric(UCI_Crecard$PAY_3)
@@ -6,6 +6,7 @@ UCI_Crecard$PAY_4<-as.numeric(UCI_Crecard$PAY_4)
 UCI_Crecard$PAY_5<-as.numeric(UCI_Crecard$PAY_5)
 UCI_Crecard$PAY_6<-as.numeric(UCI_Crecard$PAY_6)
 
+dim(data)
 str(UCI_Crecard)
 
 #  Remove missing values ,names of numeric columns

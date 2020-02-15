@@ -19,7 +19,7 @@ library(ggplot2)   # For plotting
 library(ggthemes)
 library(dplyr)
 
-UCI_Crecard <- read.csv("C:\\Users\\Vignesh EA\\Desktop\\R Scripts\\Credit Defaulters\\details.csv")
+UCI_Crecard <- read.csv("details1.csv")
 str(UCI_Crecard)
 names(UCI_Crecard)
 dim(UCI_Crecard)

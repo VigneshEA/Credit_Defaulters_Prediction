@@ -27,8 +27,9 @@ library(caret)
 library(pROC)   
 library(stringi)
 library(ggthemes)
-#library(corrplot)
 library(ggcorrplot)
+library(xgboost)
+library(Matrix)
 ```
 
 ```{r global, include=FALSE}
@@ -55,6 +56,52 @@ dupdata$EDUCATION<-cut(dupdata$EDUCATION, 4,labels = c("GraduateSchool","Univers
 
 set.seed(123)
 correlationMatrix <- round(cor(data),1)
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.8,verbose=T)
+data <- data[,-highlyCorrelated]
+dupdata <- dupdata[,-highlyCorrelated]
+data <- data[,-c(1,6)]
+dupdata <- dupdata[,-c(1,6)]
+
+data1 <- data
+data1[, c(1,5:17)] <- scale(data1[, c(1,5:17)])
+
+data1[,c(2:4,18)] <- data.frame(apply(data1[c(2:4,18)],2, as.factor))
+#str(data1)
+ind <- sample(2,nrow(data1),replace = T,prob = c(0.8,0.2))
+train <- data1[ind==1,]
+test <- data1[ind==2,]
+
+train1 <- sparse.model.matrix(default_payment~.-1,data = train)
+train_label <- train[,"default_payment"]
+train_matrix <- xgb.DMatrix(data = as.matrix(train1), label = train_label)
+test1 <- sparse.model.matrix(default_payment~.-1,data = test)
+test_label <- test[,"default_payment"]
+test_matrix <- xgb.DMatrix(data = as.matrix(test1), label = test_label)
+
+
+# Parameters
+nc <- as.numeric(as.character(length(unique(train_label))))
+xgb_params <- list("objective" = "binary:logistic",
+                   "eval_metric" = "mlogloss",
+                   "num_class" = nc)
+watchlist <- list(train = train_matrix, test = test_matrix)
+
+# eXtreme Gradient Boosting Model
+#bst_model <- xgb.train(params = xgb_params,
+ #                      data = train_matrix,
+  #                     nrounds = 100,
+   #                    watchlist = watchlist)
+
+log_model <- glm(default_payment ~., data = train, family = binomial(link = "logit"))
+summary(log_model)
+
+log_predictions <- predict(log_model, test, type="response")
+log_prediction_rd <- ifelse(log_predictions > 0.5, 1, 0)
+head(log_prediction_rd, 10)
+table(log_prediction_rd, test[,18])
+View(log_prediction_rd)
+accuracy <- table(log_prediction_rd, test[,18])
+sum(diag(accuracy))/sum(accuracy)
 ```
 
 Exploratory Analysis
@@ -140,11 +187,10 @@ Correlation Plot
 ### Correlation Plot
 
 ```{r}
-pc <- ggcorrplot::ggcorrplot(correlationMatrix, hc.order = TRUE, type = "lower",outline.col = "white")+ theme(axis.text.x=element_text(angle=90, hjust=1))
-#ggplotly(pc)
+pc <- ggcorrplot(correlationMatrix, hc.order = TRUE, type = "lower",outline.col = "white")+ theme(axis.text.x=element_text(angle=90, hjust=1))
 
-a <- melt(correlationMatrix)
-c <- a[a$Var2=='default_payment',]
+#a <- melt(correlationMatrix)
+#c <- a[a$Var2=='default_payment',]
 #pc <- ggplot(a, aes(Var1, Var2, fill = value)) +geom_tile()+  scale_fill_gradient2(low="blue", mid="white", high="red") + theme(axis.text.x=element_text(angle=90, hjust=1))
 #ggplotly(pc)
 pc
