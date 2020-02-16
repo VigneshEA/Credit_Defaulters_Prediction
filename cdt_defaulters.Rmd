@@ -195,7 +195,7 @@ pc
 ```
 
 
-Prediction Stats
+LR Prediction Stats
 ============================================
 
 ### Confusion Matrix for Logistic Regression
@@ -204,10 +204,28 @@ Prediction Stats
 print(accuracy)
 ```
 
+### Accuracy
+
+```{r}
+sum(diag(accuracy))/sum(accuracy)
+```
+
+Row
+----------------------
+
 ### AUC Curve for Logistic Regression
 
 ```{r}
-print("Work in Progress")
+plot(roccurve)
+```
+
+Row
+------------------------
+
+### AUC value
+
+```{r}
+print(roccurve)
 ```
 
 RF Prediction Stats

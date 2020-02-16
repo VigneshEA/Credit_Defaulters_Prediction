@@ -11,3 +11,6 @@ accuracy <- table(logistic_default, test[,18])
 
 logistic_results <- as.data.frame(logistic_default)
 logistic_results$id <- rownames(logistic_results)
+
+roccurve <- roc(test$default_payment ~ log_predictions)
+
