@@ -225,7 +225,7 @@ Row
 ### AUC value
 
 ```{r}
-print(roccurve)
+auc(roccurve)
 ```
 
 RF Prediction Stats
