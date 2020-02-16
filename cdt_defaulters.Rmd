@@ -100,6 +100,7 @@ source("logistic.R")
 source("random_forest_model.R")
 
 results <- merge(logistic_results, rf_results, by='id')
+results$Status <- ifelse(results$logistic_default == 0 & results$rfdefault== 0, "Will not default", "Defaulter")
 ```
 
 EDA
@@ -216,17 +217,9 @@ Row
 ### AUC Curve for Logistic Regression
 
 ```{r}
-plot(roccurve)
+plot(roccurve,main="AUC" %s+% roccurve$auc)
 ```
 
-Row
-------------------------
-
-### AUC value
-
-```{r}
-auc(roccurve)
-```
 
 RF Prediction Stats
 ============================================

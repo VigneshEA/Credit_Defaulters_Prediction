@@ -14,17 +14,19 @@ ctrl = trainControl(method="repeatedcv",
 tGrid <-  expand.grid(mtry = c(4,5,16)) 
 #ded <- read.csv("details1.csv")
 # Model for tuning
-rf_model<-train( default_payment ~.,   # Standard formula notation
-                 data=train,          
-                 method="rf",              # randomForest
-                 nodesize= 10,             # 10 data-points/node. Fastens up modeling
-                 ntree =50,            # Default 500. Reduced to fasten up modeling
-                 do.trace=50,           # Print output after every 4 trees
-                 trControl=ctrl,           # cross-validation strategy
-                 tuneGrid = tGrid,         # Grid of parameters to be tuned
-                 metric = "Accuracy"       # Default metric
-)
+#rf_model<-train( default_payment ~.,   # Standard formula notation
+ #                data=train,          
+  #               method="rf",              # randomForest
+   #              nodesize= 10,             # 10 data-points/node. Fastens up modeling
+    #             ntree =50,            # Default 500. Reduced to fasten up modeling
+     #            do.trace=50,           # Print output after every 4 trees
+      #           trControl=ctrl,           # cross-validation strategy
+       #          tuneGrid = tGrid,         # Grid of parameters to be tuned
+        #         metric = "Accuracy"       # Default metric
+#)
 
+#import model
+rf_model <- readRDS("rf_model.rds")
 #  Results
 rf_model$results
 
@@ -33,8 +35,8 @@ rf_model$bestTune
 
 rf_model$finalModel 
 
-
-
+#saveRDS(rf_model, "rf_model.rds")
+#print(rf_model1)
 #### Prediction with RF model
 v_pred <- predict(rf_model, test[,-c(18)],type = "raw")
 
