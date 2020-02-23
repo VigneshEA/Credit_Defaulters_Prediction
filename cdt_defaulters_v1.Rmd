@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
     vertical_layout: scroll
-runtime: shiny
+#runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -49,8 +49,18 @@ EDA
 ======================================
 
 
-Row {.tabset}
+Row
 ----------------------------
+
+
+### Density Plot for Gender
+
+```{r}
+p2 <- ggplot(dupdata, aes(x = SEX, fill = default_payment)) + geom_density()+ xlab("Gender") + ylab("Default Payment Status") 
+
+ggplotly(p2)
+```
+
 
 ### Gender wise Distribution
 
@@ -61,6 +71,9 @@ p <- ggplot(data=dupdata, mapping = aes(x=SEX, fill=default_payment)) + geom_bar
 ggplotly(p)
 ```
 
+Row
+----------------------------
+
 ### Age wise Density Plot
 
 ```{r}
@@ -69,6 +82,16 @@ p3 <- ggplot(dupdata, aes(x = AGE, fill = default_payment)) + geom_density()+ xl
 ggplotly(p3)
 ```
 
+### Age wise boxplot
+
+```{r}
+p <- ggplot(data=dupdata,mapping = aes(x=AGE,y=dupdata$LIMIT_BAL,fill=default_payment)) + geom_boxplot()+ xlab("Age Category") + ylab("Bank Balance")  
+
+ggplotly(p)
+```
+
+Row
+----------------------------
 
 ### Education 
 
@@ -77,18 +100,6 @@ p4 <-  ggplot(data=dupdata,mapping = aes(x=EDUCATION,y=dupdata$LIMIT_BAL,fill=de
 
 ggplotly(p4)
 ```
-
-
-### Marital Status wise Distribution
-
-```{r}
-p <- ggplot(data=dupdata, mapping = aes(x=MARRIAGE, fill=default_payment)) + geom_bar()+ xlab("Marital Status") + ylab("Customer Counts")  +theme_few()
-
-ggplotly(p)
-```
-
-Row {.tabset}
----------------
 
 ### Heat Map for Education - Age
 
@@ -99,6 +110,20 @@ p5 <- ggplot(df, aes(EDUCATION, AGE, fill=mn_creditlmt)) + geom_tile() + scale_f
 ggplotly(p5)
 ```
 
+Row
+-----------------------
+
+### Marital Status wise Distribution
+
+```{r}
+p <- ggplot(data=dupdata, mapping = aes(x=MARRIAGE, fill=default_payment)) + geom_bar()+ xlab("Marital Status") + ylab("Customer Counts")  +theme_few()
+
+ggplotly(p)
+```
+
+
+Correlation Plot
+=======================
 
 ### Correlation Plot
 
@@ -112,7 +137,8 @@ pc <- ggcorrplot(correlationMatrix, hc.order = TRUE, type = "lower",outline.col 
 pc
 ```
 
-LR Stats
+
+LR Prediction Stats
 ============================================
 
 ### Confusion Matrix for Logistic Regression
@@ -137,7 +163,7 @@ plot(roccurve,main="AUC" %s+% roccurve$auc)
 ```
 
 
-RF Stats
+RF Prediction Stats
 ============================================
 
 ### Confusion Matrix for Random Forest
@@ -175,7 +201,7 @@ Report
 This report was generated on `r format(Sys.Date(), format = "%B %d, %Y")`.
 
 
-Test Results
+Predicted Results
 ============================================
 
 ```{r}
@@ -194,85 +220,7 @@ datatable(results,
 ```
 
 
-Sidebar {.sidebar}
-=====================================
-  
-```{r}
-fileInput("file1", "Upload Test File (UCI repo format) as csv",
-          accept = c(
-            "text/csv",
-            "text/comma-separated-values,text/plain",
-            ".csv")
-)
-
-checkboxInput("header", "Header", TRUE)
-
-```
-
-
-Uploaded data Results
-=============================
-  
-### Result data
-  
-```{r}
-test_file <- reactive({
-  withProgress({
-        setProgress(message = "Loading Data...")
-  inFile <- input$file1
-  
-  if (is.null(inFile))
-    return(NULL)
-  
-  data <- read.csv(inFile$datapath, header = input$header)
-  colnames(data)[colnames(data)=="default.payment.next.month"] <-"default_payment"
-  data[, 1:25] <- sapply(data[, 1:25], as.character)
-  data[, 1:25] <- sapply(data[, 1:25], as.numeric)
-  data$EDUCATION[data$EDUCATION == 0] <- 4
-  data$EDUCATION[data$EDUCATION == 5] <- 4
-  data$EDUCATION[data$EDUCATION == 6] <- 4
-  data$MARRIAGE[data$MARRIAGE == 0] <- 3
-  data <- data[,-c(1,6,14:18)]
-  data[, c(1,5:17)] <- scale(data[, c(1,5:17)])
-  data[,c(2:4,18)] <- data.frame(apply(data[c(2:4,18)],2, as.factor))
-  
-  log_model <- readRDS("log_model.rds")
-  log_predictions <- predict(log_model, data, type="response")
-  logistic_default <- ifelse(log_predictions > 0.5, 1, 0)
-  logistic_results <- as.data.frame(logistic_default)
-  logistic_results$id <- rownames(logistic_results)
-  
-  rf_model <- readRDS("rf_model.rds")
-  prob_pred_rf <- predict(rf_model, data[, -c(18) ], type="prob")
-  prob_pred_rf$rfdefault <- ifelse(prob_pred_rf$`1` > 0.5, 1, 0)
-  rf_results <- as.data.frame(prob_pred_rf)
-  rf_results$id <- rownames(rf_results)
-  rf_results$`0` <- NULL
-  rf_results$`1` <- NULL
-
-  results <- merge(logistic_results, rf_results, by='id')
-  results$Status <- ifelse(results$logistic_default == 0 & results$rfdefault== 0, "Will not default", "Defaulter")
-  return(results)
-  })
-})
-
-renderDT({
-  datatable(test_file(),
-          caption = "Predicted Data",
-          rownames = T,
-          filter = "top",
-          extensions = 'Buttons',
-      options = list(
-        pageLength = 50,
-        dom = 'Blfrtip',
-        buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-      ))
-})
-
-
-```
-
-About
+About Report
 ========================================
 
 Created by: Vignesh EA
